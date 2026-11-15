@@ -1,0 +1,145 @@
+.leaflet-container.karhutla-map {
+  background: #d6e9ed;
+  color: #183241;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+.karhutla-map:focus-visible {
+  outline: 3px solid #175d89;
+  outline-offset: -3px;
+}
+.karhutla-map.is-measuring { cursor: crosshair; }
+.karhutla-map.is-measuring .leaflet-interactive { pointer-events: none !important; }
+.karhutla-map .atlas-label {
+  width: auto !important;
+  height: auto !important;
+  background: none;
+  border: 0;
+  pointer-events: none;
+}
+.atlas-label > span {
+  display: inline-block;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  color: #435e4e;
+  font-size: 11px;
+  line-height: 1.1;
+  font-weight: 650;
+  text-shadow: 0 1px 2px #f4f6ec, 1px 0 2px #f4f6ec, -1px 0 2px #f4f6ec;
+}
+.atlas-label.island > span {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.15px;
+}
+.atlas-label.country > span {
+  color: #687360;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+.atlas-label.sea > span {
+  font: italic 12px/1.15 Georgia, serif;
+  color: #527c8a;
+  font-weight: 400;
+  letter-spacing: .4px;
+  text-shadow: 0 1px 2px #e8f3f4;
+}
+.atlas-label.city > span {
+  color: #4c6159;
+  font-size: 10px;
+  font-weight: 550;
+  transform: translate(4px, -50%);
+}
+.atlas-label.city > span::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: calc(50% - 2px);
+  width: 3px;
+  height: 3px;
+  border-radius: 100%;
+  background: #657365;
+}
+.karhutla-map .hotspot-point,
+.karhutla-map .hotspot-cluster {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  border-radius: 100%;
+}
+.hotspot-point > span {
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 1.6px solid #fff9ed;
+  background: #ef692f;
+  border-radius: 100%;
+  box-shadow: 0 0 0 3px rgb(233 108 47 / 23%);
+}
+.hotspot-cluster > span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 100%;
+  background: #c94c1b;
+  border: 1px solid #ffddae;
+  color: white;
+  box-shadow: 0 0 0 4px rgb(234 108 42 / 28%), 0 1px 4px rgb(105 55 19 / 16%);
+  font: 700 11px/1 "DM Sans", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.hotspot-point:focus-visible, .hotspot-cluster:focus-visible {
+  outline: 3px solid #17485d;
+  outline-offset: 4px;
+}
+.karhutla-map .leaflet-control-scale-line {
+  border: 1px solid #506975;
+  border-top: 0;
+  background: rgb(244 251 250 / 65%);
+  font-size: 9px;
+  color: #324f5e;
+}
+.karhutla-map .leaflet-control-attribution {
+  color: #385363;
+  background: rgb(249 252 251 / 90%);
+  font-size: 9px;
+  line-height: 1.45;
+  max-width: min(76vw, 450px);
+  text-align: right;
+  white-space: normal;
+}
+.karhutla-map .leaflet-control-attribution a { color: #2f586b; }
+.karhutla-map .leaflet-popup-content-wrapper { border-radius: 12px; }
+.karhutla-map .leaflet-popup-content {
+  margin: 15px 20px 15px 15px;
+  min-width: 170px;
+  max-width: min(265px, 58vw);
+  overflow-wrap: anywhere;
+}
+.hotspot-popup h3 {
+  color: #1c3040;
+  margin: 0 0 9px;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.hotspot-popup dl {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.hotspot-popup dt { color: #586877; }
+.hotspot-popup dd { margin: 0; font-weight: 600; color: #253b49; }
+.karhutla-map .measure-tooltip { font-weight: 700; color: #164c69; }
+@media (max-width: 600px) {
+  .karhutla-map .leaflet-control-attribution { max-width: 235px; font-size: 9px; }
+  .atlas-label.island > span { font-size: 9px; letter-spacing: .7px; }
+  .atlas-label.sea > span { font-size: 10px; }
+}

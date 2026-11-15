@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#14253a" />
+    <meta
+      name="description"
+      content="WebGIS untuk menjelajahi deteksi titik panas satelit di Indonesia, menyaring pengamatan dan menganalisis persebarannya."
+    />
+    <title>Dashboard pemantauan · Karhutla GIS Indonesia</title>
+    <link rel="icon" href="./assets/brand.svg" type="image/svg+xml" />
+    <link rel="preload" href="./assets/vendor/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="./assets/vendor/leaflet.css" />
+    <link rel="stylesheet" href="./assets/vendor/markercluster.css" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="stylesheet" href="./assets/map/atlas.css" />
+    <script type="module" src="./js/main.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Langsung ke konten</a>
+    <div class="scrim" id="nav-scrim" hidden></div>
+    <aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
+      <a class="brand" href="#dashboard" aria-label="Karhutla GIS Indonesia, dashboard"
+        ><img src="./assets/brand.svg" width="40" height="40" alt="" /><span
+          ><strong>Karhutla<span class="brand-dot">.</span></strong
+          ><small>GIS INDONESIA</small></span
+        ></a
+      >
+      <div class="nav-body">
+        <div class="nav-caption">Ruang kerja</div>
+        <nav class="nav-list" aria-label="Ruang kerja">
+          <a href="#dashboard" data-view="dashboard" aria-current="page"
+            ><i data-icon="layout-dashboard"></i><span>Dashboard</span></a
+          >
+          <a href="#statistik" data-view="statistik"
+            ><i data-icon="chart-no-axes-column-increasing"></i><span>Analisis statistik</span></a
+          >
+          <a href="#dataset" data-view="dataset"><i data-icon="database"></i><span>Dataset</span></a>
+        </nav>
+        <div class="nav-caption second-caption">Informasi</div>
+        <nav class="nav-list" aria-label="Informasi">
+          <a href="#panduan" data-view="panduan"><i data-icon="book-open"></i><span>Panduan</span></a>
+        </nav>
+      </div>
+      <div class="side-bottom">
+        <button class="coverage" id="coverage-home" title="Lihat cakupan seluruh Indonesia">
+          <span class="coverage-art" aria-hidden="true"
+            ><img src="./assets/map/indonesia-outline.svg" alt="" /></span
+          ><span class="coverage-label"
+            ><i data-icon="globe2"></i> Cakupan nasional <i data-icon="arrow-up-right"></i
+          ></span>
+        </button>
+        <div class="side-version"><span class="version-dot"></span> Karhutla WebGIS <span>v1.0</span></div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button
+          class="icon-button mobile-menu"
+          id="mobile-menu"
+          type="button"
+          aria-label="Buka navigasi"
+          aria-controls="sidebar"
+          aria-expanded="false"
+        >
+          <i data-icon="menu"></i>
+        </button>
+        <a class="mobile-brand" href="#dashboard" aria-label="Karhutla GIS Indonesia"
+          ><img src="./assets/brand.svg" width="25" height="25" alt="" /><strong
+            >Karhutla<span>.</span></strong
+          ></a
+        >
+        <div class="breadcrumbs">
+          <i data-icon="panel-left"></i><span>Ruang kerja</span><i data-icon="chevron-right"></i
+          ><strong id="crumb">Dashboard</strong>
+        </div>
+        <span class="system-status" id="system-status" role="status"
+          ><span></span><b id="status-label">Memuat data</b></span
+        >
+      </header>
+      <main id="main" tabindex="-1">
+        <div class="page-heading">
+          <div>
+            <h1 id="page-title">Dashboard pemantauan</h1>
+            <p id="page-subtitle">Pantau persebaran titik panas dari pengamatan satelit di Indonesia.</p>
+          </div>
+          <div class="heading-actions" id="heading-actions">
+            <button type="button" class="button secondary" id="export-btn" disabled>
+              <i data-icon="download"></i>Ekspor CSV</button
+            ><button type="button" class="button primary" data-import>
+              <i data-icon="upload"></i>Impor data
+            </button>
+          </div>
+        </div>
+        <div id="dataset-message" class="notice" role="status" hidden></div>
+        <section class="metrics" id="metrics" aria-label="Ringkasan hasil filter">
+          <article class="metric">
+            <div class="metric-top">
+              <span class="metric-icon orange"><i data-icon="flame"></i></span>
+              <h2>Total hotspot</h2>
+            </div>
+            <div class="metric-value">
+              <strong id="metric-total">—</strong><span>deteksi</span
+              ><svg class="spark" id="mini-trend" viewBox="0 0 94 29" aria-hidden="true"></svg>
+            </div>
+          </article>
+          <article class="metric">
+            <div class="metric-top">
+              <span class="metric-icon teal"><i data-icon="map-pin"></i></span>
+              <h2>Provinsi terdeteksi</h2>
+            </div>
+            <div class="metric-value"><strong id="metric-provinces">—</strong><span>provinsi</span></div>
+          </article>
+          <article class="metric">
+            <div class="metric-top">
+              <span class="metric-icon blue"><i data-icon="satellite"></i></span>
+              <h2>Satelit pengamat</h2>
+            </div>
+            <div class="metric-value"><strong id="metric-satellites">—</strong><span>satelit</span></div>
+          </article>
+          <article class="metric">
+            <div class="metric-top">
+              <span class="metric-icon violet"><i data-icon="calendar-days"></i></span>
+              <h2>Periode pengamatan</h2>
+            </div>
+            <div class="metric-value period-value"><strong id="metric-period">—</strong></div>
+          </article>
+        </section>
+        <section class="filter-bar" id="filters" aria-label="Filter pengamatan">
+          <label class="search-field"
+            ><i data-icon="search"></i
+            ><input id="region-query" type="search" placeholder="Cari wilayah..." aria-label="Cari wilayah"
+          /></label>
+          <button
+            class="button secondary mobile-filters"
+            id="filter-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="filter-fields"
+          >
+            <i data-icon="sliders-horizontal"></i>Filter<span id="filter-count"></span>
+          </button>
+          <div class="filter-fields" id="filter-fields">
+            <label class="filter-select"
+              ><i data-icon="map-pin"></i
+              ><select id="province" aria-label="Filter provinsi">
+                <option value="">Semua provinsi</option></select
+              ><i data-icon="chevron-down"></i
+            ></label>
+            <div class="date-wrap">
+              <button
+                type="button"
+                class="filter-date"
+                id="date-button"
+                aria-expanded="false"
+                aria-controls="date-panel"
+              >
+                <i data-icon="calendar-days"></i><span>Rentang tanggal</span><i data-icon="chevron-down"></i>
+              </button>
+              <div id="date-panel" class="popover date-panel" hidden>
+                <h3>Rentang pengamatan (UTC)</h3>
+                <label>Dari tanggal<input type="date" id="date-from" /></label
+                ><label>Sampai tanggal<input type="date" id="date-to" /></label
+                ><button type="button" id="clear-dates" class="text-button">Hapus rentang</button>
+              </div>
+            </div>
+            <label class="filter-select"
+              ><i data-icon="satellite"></i
+              ><select id="satellite" aria-label="Filter satelit">
+                <option value="">Semua satelit</option></select
+              ><i data-icon="chevron-down"></i
+            ></label>
+            <label class="filter-select"
+              ><i data-icon="sliders-horizontal"></i
+              ><select id="confidence" aria-label="Filter confidence">
+                <option value="">Confidence</option></select
+              ><i data-icon="chevron-down"></i
+            ></label>
+            <button type="button" class="reset-button" id="reset-filters" title="Reset semua filter">
+              <i data-icon="rotate-ccw"></i><span>Reset</span>
+            </button>
+          </div>
+        </section>
+        <section id="dashboard-view" aria-label="Peta dan ringkasan analisis">
+          <div class="dashboard-grid">
+            <article class="panel map-panel" id="map-panel">
+              <header class="panel-heading map-heading">
+                <div>
+                  <span class="title-icon"><i data-icon="map"></i></span>
+                  <h2>Peta sebaran hotspot</h2>
+                  <span class="map-source" id="map-source">Memuat</span>
+                </div>
+                <button
+                  type="button"
+                  class="icon-button expand-map"
+                  id="expand-map"
+                  aria-label="Perbesar panel peta"
+                  aria-pressed="false"
+                  title="Perbesar panel peta"
+                >
+                  <i data-icon="maximize2"></i>
+                </button>
+              </header>
+              <div class="map-stage" id="map-stage">
+                <div id="map" aria-label="Peta interaktif titik panas Indonesia"></div>
+                <div class="layer-wrap">
+                  <button
+                    class="map-button layer-button"
+                    id="layer-button"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="layer-panel"
+                  >
+                    <i data-icon="layers3"></i>Lapisan<i data-icon="chevron-down"></i>
+                  </button>
+                  <div id="layer-panel" class="popover layer-panel" hidden>
+                    <fieldset>
+                      <legend>Peta dasar</legend>
+                      <label><input type="radio" name="basemap" value="atlas" checked />Atlas Indonesia</label
+                      ><label><input type="radio" name="basemap" value="osm" />OpenStreetMap</label
+                      ><label><input type="radio" name="basemap" value="esri" />Esri World Imagery</label>
+                    </fieldset>
+                    <fieldset>
+                      <legend>Layer tematik</legend>
+                      <label><input type="checkbox" id="show-hotspots" checked />Titik panas</label>
+                    </fieldset>
+                  </div>
+                </div>
+                <div class="map-tools">
+                  <div class="tool-stack">
+                    <button type="button" id="zoom-in" aria-label="Perbesar peta" title="Perbesar">
+                      <i data-icon="plus"></i></button
+                    ><button type="button" id="zoom-out" aria-label="Perkecil peta" title="Perkecil">
+                      <i data-icon="minus"></i>
+                    </button>
+                  </div>
+                  <div class="tool-stack">
+                    <button
+                      type="button"
+                      id="map-home"
+                      aria-label="Cakupan seluruh Indonesia"
+                      title="Cakupan seluruh Indonesia"
+                    >
+                      <i data-icon="globe2"></i></button
+                    ><button
+                      type="button"
+                      id="map-fit"
+                      aria-label="Zoom ke hasil filter"
+                      title="Zoom ke hasil filter"
+                    >
+                      <i data-icon="crosshair"></i></button
+                    ><button
+                      type="button"
+                      id="map-locate"
+                      aria-label="Tampilkan lokasi saya"
+                      title="Lokasi saya"
+                    >
+                      <i data-icon="locate-fixed"></i></button
+                    ><button
+                      type="button"
+                      id="map-ruler"
+                      aria-label="Ukur jarak"
+                      title="Ukur jarak"
+                      aria-pressed="false"
+                    >
+                      <i data-icon="ruler"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="measurement" id="measurement" hidden>
+                  <span></span
+                  ><button type="button" id="end-measure" aria-label="Akhiri pengukuran">
+                    <i data-icon="x"></i>
+                  </button>
+                </div>
+                <div class="map-empty" id="map-empty" role="status" hidden></div>
+              </div>
+              <div class="map-legend" aria-label="Legenda peta">
+                <strong>Legenda</strong><span><b class="point-key"></b>Titik panas</span
+                ><span><b class="cluster-key"></b>Klaster deteksi</span><span class="crs">WGS 84</span>
+              </div>
+            </article>
+            <div class="chart-stack">
+              <article class="panel chart-card">
+                <header class="card-head">
+                  <div>
+                    <h2>Tren deteksi</h2>
+                    <p>Jumlah hotspot per tanggal</p>
+                  </div>
+                  <span class="chart-symbol"><i data-icon="activity"></i></span>
+                </header>
+                <div id="trend-chart" class="trend-chart"></div>
+              </article>
+              <article class="panel chart-card province-card">
+                <header class="card-head">
+                  <div>
+                    <h2>Provinsi teratas</h2>
+                    <p>Hingga 5 provinsi dengan deteksi terbanyak</p>
+                  </div>
+                </header>
+                <div id="province-chart"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+        <section id="statistik-view" hidden aria-label="Analisis statistik">
+          <div class="analysis-charts">
+            <article class="panel chart-card">
+              <header class="card-head">
+                <div>
+                  <h2>Tren deteksi</h2>
+                  <p>Jumlah hotspot per tanggal pengamatan (UTC)</p>
+                </div>
+              </header>
+              <div id="detail-trend"></div>
+            </article>
+            <article class="panel chart-card">
+              <header class="card-head">
+                <div>
+                  <h2>Distribusi provinsi</h2>
+                  <p>Hingga 10 provinsi dengan deteksi terbanyak</p>
+                </div>
+              </header>
+              <div id="detail-provinces"></div>
+            </article>
+          </div>
+          <div id="stats-tables" class="stats-tables"></div>
+        </section>
+        <section id="dataset-view" hidden aria-label="Informasi dataset">
+          <article class="panel dataset-info">
+            <span class="dataset-emblem"><i data-icon="database"></i></span>
+            <div>
+              <h2 id="file-label">Dataset aktif</h2>
+              <p id="file-description"></p>
+            </div>
+            <button id="restore-btn" class="button secondary" type="button">Pulihkan dataset awal</button>
+          </article>
+        </section>
+        <section class="panel records" id="records">
+          <header class="panel-heading records-heading">
+            <div>
+              <span class="title-icon"><i data-icon="table2"></i></span>
+              <h2>Data pengamatan</h2>
+              <span id="records-count" class="count-pill">—</span>
+            </div>
+            <a class="panel-link" href="#dataset" id="all-records"
+              >Lihat dataset <i data-icon="arrow-up-right"></i
+            ></a>
+          </header>
+          <div
+            class="table-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Tabel pengamatan, gulir horizontal bila perlu"
+          >
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tanggal (UTC)</th>
+                  <th>Provinsi</th>
+                  <th>Satelit</th>
+                  <th>Confidence</th>
+                  <th>FRP (MW)</th>
+                  <th>Koordinat</th>
+                </tr>
+              </thead>
+              <tbody id="records-body"></tbody>
+            </table>
+          </div>
+          <div class="table-pager">
+            <span id="page-info"></span>
+            <div>
+              <button id="prev-page" class="icon-button" type="button" aria-label="Halaman sebelumnya">
+                <i data-icon="chevron-left"></i></button
+              ><button id="next-page" class="icon-button" type="button" aria-label="Halaman berikutnya">
+                <i data-icon="chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+        <section class="guide" id="panduan-view" hidden aria-label="Panduan pengguna">
+          <article class="panel guide-card">
+            <h2>Membaca peta</h2>
+            <p>
+              Setiap titik mewakili satu deteksi anomali panas dari pengamatan satelit. Deteksi memerlukan
+              verifikasi lapangan untuk memastikan kebakaran. Angka dalam klaster menunjukkan jumlah
+              pengamatan yang berdekatan pada tingkat zoom tersebut.
+            </p>
+            <p>
+              Klik klaster untuk memperbesar, atau pilih titik tunggal untuk membaca atributnya. Gunakan
+              kontrol lapisan untuk memilih peta dasar dan menampilkan titik panas.
+            </p>
+          </article>
+          <article class="panel guide-card">
+            <h2>Menggunakan data sendiri</h2>
+            <ol>
+              <li>
+                Di NASA FIRMS, pilih Indonesia, sensor VIIRS, periode pengamatan, dan format CSV. Untuk arsip,
+                masuk dengan Earthdata atau email dan ikuti tautan unduhan.
+              </li>
+              <li>
+                Pilih <strong>Impor data</strong> lalu buka file CSV atau GeoJSON Point. Impor mengganti
+                dataset aktif di sesi browser ini.
+              </li>
+              <li>
+                Kombinasikan filter. Tombol <strong>Ekspor CSV</strong> mengunduh pengamatan yang lolos
+                filter.
+              </li>
+            </ol>
+            <a
+              class="panel-link"
+              href="https://firms.modaps.eosdis.nasa.gov/download/"
+              target="_blank"
+              rel="noopener"
+              >Unduhan NASA FIRMS <i data-icon="arrow-up-right"></i
+            ></a>
+          </article>
+          <article class="panel guide-card">
+            <h2>Confidence dan FRP</h2>
+            <p>
+              Confidence menyatakan keyakinan algoritme pada deteksi. FRP (<em>fire radiative power</em>)
+              mengukur daya radiasi dalam megawatt. Keduanya perlu ditafsirkan sesuai produk satelit. Satu
+              wilayah dapat teramati berkali-kali.
+            </p>
+            <a
+              class="panel-link"
+              href="https://www.earthdata.nasa.gov/data/tools/firms/faq"
+              target="_blank"
+              rel="noopener"
+              >FAQ FIRMS <i data-icon="arrow-up-right"></i
+            ></a>
+          </article>
+          <article class="panel guide-card">
+            <h2>Alat peta dan sumber nasional</h2>
+            <p>
+              Aktifkan penggaris, lalu pilih titik awal dan titik akhir untuk mengukur jarak geografis. Lokasi
+              saya memerlukan izin browser. Atlas tersedia lokal, sedangkan ubin OSM dan Esri memerlukan
+              internet.
+            </p>
+            <p>
+              SiPongi menyediakan pemantauan nasional. Untuk mengimpor datanya, gunakan berkas yang berisi
+              koordinat tiap pengamatan. Cantumkan sumber SIPONGI KEMENHUT.
+            </p>
+            <a
+              class="panel-link"
+              href="https://sipongi.gakkum.kehutanan.go.id/sebaran-titik-panas"
+              target="_blank"
+              rel="noopener"
+              >Buka SiPongi <i data-icon="arrow-up-right"></i
+            ></a>
+          </article>
+        </section>
+        <footer class="footnote">
+          <span
+            ><i data-icon="info"></i>Hotspot mengindikasikan anomali panas. Konfirmasi kebakaran memerlukan
+            verifikasi lapangan.</span
+          ><span id="source-foot">Sumber pengamatan belum dimuat.</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="import-dialog" aria-labelledby="import-title">
+      <div class="dialog-head">
+        <div class="dialog-emblem"><i data-icon="file-up"></i></div>
+        <button id="close-import" class="icon-button" type="button" aria-label="Tutup dialog impor">
+          <i data-icon="x"></i>
+        </button>
+      </div>
+      <h2 id="import-title">Impor dataset</h2>
+      <p>
+        Pilih CSV pengamatan atau GeoJSON berisi titik. Berkas diproses di browser dan mengganti dataset aktif
+        setelah lolos validasi.
+      </p>
+      <div class="drop-zone" id="drop-zone">
+        <i data-icon="upload"></i><strong>Tarik berkas ke sini</strong
+        ><label class="button secondary file-picker"
+          >Pilih berkas<input
+            id="import-file"
+            type="file"
+            accept=".csv,.geojson,.json,text/csv,application/geo+json,application/json"
+        /></label>
+      </div>
+      <div class="import-state" id="import-state" role="status"></div>
+      <p class="dialog-hint">
+        CSV memerlukan latitude, longitude, dan acq_date. Untuk data FIRMS, gunakan tanggal dan waktu UTC.
+      </p>
+      <a
+        class="panel-link"
+        href="https://firms.modaps.eosdis.nasa.gov/download/"
+        target="_blank"
+        rel="noopener"
+        >Unduh data NASA FIRMS <i data-icon="arrow-up-right"></i
+      ></a>
+    </dialog>
+    <div class="toast" id="toast" role="status" hidden></div>
+    <noscript>Aktifkan JavaScript untuk memuat peta dan menganalisis pengamatan.</noscript>
+  </body>
+</html>
