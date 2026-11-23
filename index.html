@@ -41,6 +41,7 @@
         </nav>
         <div class="nav-caption second-caption">Informasi</div>
         <nav class="nav-list" aria-label="Informasi">
+          <a href="#peraturan" data-view="peraturan"><i data-icon="file-up"></i><span>Peraturan perundangan</span></a>
           <a href="#panduan" data-view="panduan"><i data-icon="book-open"></i><span>Panduan</span></a>
         </nav>
       </div>
@@ -392,7 +393,7 @@
                 <strong id="emisi-metric-total">—</strong><span>ton CO₂</span>
               </div>
             </article>
-           <article class="metric">
+            <article class="metric">
               <div class="metric-top">
                 <span class="metric-icon teal"><i data-icon="map-pin"></i></span>
                 <h2 id="emisi-metric-top-label">Provinsi tertinggi</h2>
@@ -490,6 +491,35 @@
           </section>
         </section>
 
+        <section id="peraturan-view" hidden aria-label="Peraturan perundangan">
+          <section class="filter-bar" aria-label="Filter peraturan perundangan">
+            <label class="search-field">
+              <i data-icon="search"></i>
+              <input
+                id="reg-search"
+                type="search"
+                placeholder="Cari judul, nomor, atau tahun peraturan..."
+                aria-label="Cari peraturan perundangan"
+              />
+            </label>
+            <div class="filter-fields">
+              <label class="filter-select">
+                <i data-icon="sliders-horizontal"></i>
+                <select id="reg-category" aria-label="Filter kategori peraturan">
+                  <option value="">Semua kategori</option>
+                </select>
+                <i data-icon="chevron-down"></i>
+              </label>
+              <span id="reg-count" class="count-pill" style="align-self:center;">—</span>
+              <button type="button" class="reset-button" id="reg-reset" title="Reset filter peraturan">
+                <i data-icon="rotate-ccw"></i><span>Reset</span>
+              </button>
+            </div>
+          </section>
+
+          <div id="reg-list" style="display:flex;flex-direction:column;gap:0.85rem;margin-top:1rem;"></div>
+        </section>
+
         <section class="guide" id="panduan-view" hidden aria-label="Panduan pengguna">
           <article class="panel guide-card">
             <h2>Membaca peta</h2>
@@ -564,8 +594,8 @@
         </section>
         <footer class="footnote">
           <span
-            ><i data-icon="info"></i>Hotspot mengindikasikan anomali panas. Konfirmasi kebakaran memerlukan
-            verifikasi lapangan.</span
+            ><i data-icon="info"></i><span id="foot-note-text">Hotspot mengindikasikan anomali panas. Konfirmasi kebakaran memerlukan
+            verifikasi lapangan.</span></span
           ><span id="source-foot">Sumber pengamatan belum dimuat.</span>
         </footer>
       </main>

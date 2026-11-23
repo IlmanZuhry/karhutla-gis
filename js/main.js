@@ -10,6 +10,7 @@ import {
 } from './statistics.js';
 import { createHotspotMap } from './map.js';
 import { initEmissions } from './emissions.js';
+import { initRegulations } from './regulations.js';
 import {
   byId,
   installIcons,
@@ -44,6 +45,11 @@ const views = {
     'Data emisi',
     'Data emisi CO₂',
     'Pantau estimasi emisi karbon dioksida (CO₂) karhutla per provinsi tahun 2018–2026.',
+  ],
+  peraturan: [
+    'Peraturan perundangan',
+    'Peraturan perundangan',
+    'Kumpulan regulasi, undang-undang, dan keputusan terkait pengendalian kebakaran hutan dan lahan.',
   ],
   panduan: [
     'Panduan',
@@ -324,6 +330,8 @@ function navigate() {
   byId('page-title').textContent = title;
   byId('page-subtitle').textContent = subtitle;
   byId('crumb').textContent = crumb;
+  const sectionLabel = view === 'peraturan' || view === 'panduan' ? 'Informasi' : 'Ruang kerja';
+  document.querySelector('.breadcrumbs span').textContent = sectionLabel;
   document.title = title + ' · Karhutla GIS Indonesia';
   document.querySelectorAll('[data-view]').forEach((link) => {
     link.setAttribute('aria-label', views[link.dataset.view][0]);
@@ -331,18 +339,29 @@ function navigate() {
     else link.removeAttribute('aria-current');
   });
   for (const id of ['metrics', 'filters', 'heading-actions'])
-    byId(id).hidden = view === 'panduan' || view === 'emisi';
+    byId(id).hidden = view === 'panduan' || view === 'emisi' || view === 'peraturan';
   byId('records').hidden = view !== 'dashboard' && view !== 'dataset';
   byId('all-records').hidden = view === 'dataset';
   setNav(false);
   if (view !== 'dashboard' && byId('map-panel').classList.contains('expanded')) expandMap(false);
-if (view === 'statistik') renderAnalysis();
+  if (view === 'statistik') renderAnalysis();
   if (view === 'emisi') {
     void initEmissions();
+    byId('foot-note-text').textContent =
+      'Nilai emisi merupakan estimasi akumulasi karbon dioksida (CO₂) akibat kebakaran hutan dan lahan.';
     byId('source-foot').textContent = 'Sumber data: SIPONGI KEMENHUT · Emisi CO₂ Karhutla (2018–2026)';
-  } else if (dataset.label) {
-    const attribution = imported ? (dataset.isDemo ? 'DATA DEMO' : 'Impor lokal') : dataset.source;
-    byId('source-foot').textContent = 'Sumber data: ' + attribution + ' · ' + dataset.label;
+  } else if (view === 'peraturan') {
+    initRegulations();
+    byId('foot-note-text').textContent =
+      'Dokumen regulasi bersumber dari arsip peraturan perundangan pengendalian karhutla nasional.';
+    byId('source-foot').textContent = 'Sumber data: SIPONGI KEMENHUT · Peraturan Perundangan';
+  } else {
+    byId('foot-note-text').textContent =
+      'Hotspot mengindikasikan anomali panas. Konfirmasi kebakaran memerlukan verifikasi lapangan.';
+    if (dataset.label) {
+      const attribution = imported ? (dataset.isDemo ? 'DATA DEMO' : 'Impor lokal') : dataset.source;
+      byId('source-foot').textContent = 'Sumber data: ' + attribution + ' · ' + dataset.label;
+    }
   }
   page = 0;
   renderPage();
