@@ -37,9 +37,11 @@
             ><i data-icon="chart-no-axes-column-increasing"></i><span>Analisis statistik</span></a
           >
           <a href="#dataset" data-view="dataset"><i data-icon="database"></i><span>Dataset</span></a>
+          <a href="#emisi" data-view="emisi"><i data-icon="flame"></i><span>Data emisi</span></a>
         </nav>
         <div class="nav-caption second-caption">Informasi</div>
         <nav class="nav-list" aria-label="Informasi">
+          <a href="#peraturan" data-view="peraturan"><i data-icon="file-up"></i><span>Peraturan perundangan</span></a>
           <a href="#panduan" data-view="panduan"><i data-icon="book-open"></i><span>Panduan</span></a>
         </nav>
       </div>
@@ -379,6 +381,145 @@
             </div>
           </div>
         </section>
+
+        <section id="emisi-view" hidden aria-label="Data emisi CO2">
+          <section class="metrics" aria-label="Ringkasan emisi CO2">
+            <article class="metric">
+              <div class="metric-top">
+                <span class="metric-icon orange"><i data-icon="flame"></i></span>
+                <h2>Total emisi CO₂</h2>
+              </div>
+              <div class="metric-value">
+                <strong id="emisi-metric-total">—</strong><span>ton CO₂</span>
+              </div>
+            </article>
+            <article class="metric">
+              <div class="metric-top">
+                <span class="metric-icon teal"><i data-icon="map-pin"></i></span>
+                <h2 id="emisi-metric-top-label">Provinsi tertinggi</h2>
+              </div>
+              <div class="metric-value">
+                <strong id="emisi-metric-top-val">—</strong><span>ton CO₂</span>
+              </div>
+            </article>
+            <article class="metric">
+              <div class="metric-top">
+                <span class="metric-icon blue"><i data-icon="activity"></i></span>
+                <h2>Rata-rata provinsi</h2>
+              </div>
+              <div class="metric-value">
+                <strong id="emisi-metric-avg">—</strong><span>ton CO₂</span>
+              </div>
+            </article>
+            <article class="metric">
+              <div class="metric-top">
+                <span class="metric-icon violet"><i data-icon="calendar-days"></i></span>
+                <h2>Periode data</h2>
+              </div>
+              <div class="metric-value period-value"><strong id="emisi-metric-period">2018–2026</strong></div>
+            </article>
+          </section>
+
+          <section class="filter-bar" aria-label="Filter data emisi" style="margin-top:1rem;">
+            <label class="search-field">
+              <i data-icon="search"></i>
+              <input id="emisi-search" type="search" placeholder="Cari provinsi..." aria-label="Cari provinsi" />
+            </label>
+            <div class="filter-fields">
+              <label class="filter-select">
+                <i data-icon="calendar-days"></i>
+                <select id="emisi-year" aria-label="Filter tahun emisi">
+                  <option value="">Semua tahun (2018–2026)</option>
+                </select>
+                <i data-icon="chevron-down"></i>
+              </label>
+              <button type="button" class="reset-button" id="emisi-reset" title="Reset filter emisi">
+                <i data-icon="rotate-ccw"></i><span>Reset</span>
+              </button>
+            </div>
+          </section>
+
+          <div class="analysis-charts" style="margin-top:1rem;">
+            <article class="panel chart-card">
+              <header class="card-head">
+                <div>
+                  <h2>Tren emisi CO₂ nasional</h2>
+                  <p>Akumulasi emisi per tahun (2018–2026)</p>
+                </div>
+              </header>
+              <div id="emisi-trend-chart"></div>
+            </article>
+            <article class="panel chart-card">
+              <header class="card-head">
+                <div>
+                  <h2>10 Provinsi emisi tertinggi</h2>
+                  <p>Peringkat berdasarkan filter tahun aktif</p>
+                </div>
+              </header>
+              <div id="emisi-province-chart"></div>
+            </article>
+          </div>
+
+          <section class="panel records" style="margin-top:1rem;">
+            <header class="panel-heading records-heading">
+              <div>
+                <span class="title-icon"><i data-icon="table2"></i></span>
+                <h2>Tabel emisi CO₂ per provinsi</h2>
+                <span id="emisi-count" class="count-pill">—</span>
+              </div>
+            </header>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Tabel emisi CO2 per provinsi">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Provinsi</th>
+                    <th style="text-align:right;">2018</th>
+                    <th style="text-align:right;">2019</th>
+                    <th style="text-align:right;">2020</th>
+                    <th style="text-align:right;">2021</th>
+                    <th style="text-align:right;">2022</th>
+                    <th style="text-align:right;">2023</th>
+                    <th style="text-align:right;">2024</th>
+                    <th style="text-align:right;">2025</th>
+                    <th style="text-align:right;">2026</th>
+                    <th style="text-align:right;">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="emisi-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section id="peraturan-view" hidden aria-label="Peraturan perundangan">
+          <section class="filter-bar" aria-label="Filter peraturan perundangan">
+            <label class="search-field">
+              <i data-icon="search"></i>
+              <input
+                id="reg-search"
+                type="search"
+                placeholder="Cari judul, nomor, atau tahun peraturan..."
+                aria-label="Cari peraturan perundangan"
+              />
+            </label>
+            <div class="filter-fields">
+              <label class="filter-select">
+                <i data-icon="sliders-horizontal"></i>
+                <select id="reg-category" aria-label="Filter kategori peraturan">
+                  <option value="">Semua kategori</option>
+                </select>
+                <i data-icon="chevron-down"></i>
+              </label>
+              <span id="reg-count" class="count-pill" style="align-self:center;">—</span>
+              <button type="button" class="reset-button" id="reg-reset" title="Reset filter peraturan">
+                <i data-icon="rotate-ccw"></i><span>Reset</span>
+              </button>
+            </div>
+          </section>
+
+          <div id="reg-list" style="display:flex;flex-direction:column;gap:0.85rem;margin-top:1rem;"></div>
+        </section>
+
         <section class="guide" id="panduan-view" hidden aria-label="Panduan pengguna">
           <article class="panel guide-card">
             <h2>Membaca peta</h2>
@@ -453,8 +594,8 @@
         </section>
         <footer class="footnote">
           <span
-            ><i data-icon="info"></i>Hotspot mengindikasikan anomali panas. Konfirmasi kebakaran memerlukan
-            verifikasi lapangan.</span
+            ><i data-icon="info"></i><span id="foot-note-text">Hotspot mengindikasikan anomali panas. Konfirmasi kebakaran memerlukan
+            verifikasi lapangan.</span></span
           ><span id="source-foot">Sumber pengamatan belum dimuat.</span>
         </footer>
       </main>
