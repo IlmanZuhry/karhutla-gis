@@ -9,6 +9,7 @@ import {
   renderStatsTables,
 } from './statistics.js';
 import { createHotspotMap } from './map.js';
+import { initEmissions } from './emissions.js';
 import {
   byId,
   installIcons,
@@ -38,6 +39,11 @@ const views = {
     'Dataset',
     'Dataset pengamatan',
     'Periksa sumber, atribut, dan baris pengamatan yang sesuai dengan filter.',
+  ],
+  emisi: [
+    'Data emisi',
+    'Data emisi CO₂',
+    'Pantau estimasi emisi karbon dioksida (CO₂) karhutla per provinsi tahun 2018–2026.',
   ],
   panduan: [
     'Panduan',
@@ -324,12 +330,20 @@ function navigate() {
     if (link.dataset.view === view) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
-  for (const id of ['metrics', 'filters', 'heading-actions']) byId(id).hidden = view === 'panduan';
+  for (const id of ['metrics', 'filters', 'heading-actions'])
+    byId(id).hidden = view === 'panduan' || view === 'emisi';
   byId('records').hidden = view !== 'dashboard' && view !== 'dataset';
   byId('all-records').hidden = view === 'dataset';
   setNav(false);
   if (view !== 'dashboard' && byId('map-panel').classList.contains('expanded')) expandMap(false);
-  if (view === 'statistik') renderAnalysis();
+if (view === 'statistik') renderAnalysis();
+  if (view === 'emisi') {
+    void initEmissions();
+    byId('source-foot').textContent = 'Sumber data: SIPONGI KEMENHUT · Emisi CO₂ Karhutla (2018–2026)';
+  } else if (dataset.label) {
+    const attribution = imported ? (dataset.isDemo ? 'DATA DEMO' : 'Impor lokal') : dataset.source;
+    byId('source-foot').textContent = 'Sumber data: ' + attribution + ' · ' + dataset.label;
+  }
   page = 0;
   renderPage();
   window.scrollTo(0, 0);
