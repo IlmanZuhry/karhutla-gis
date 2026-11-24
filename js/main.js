@@ -46,6 +46,11 @@ const views = {
     'Data emisi CO₂',
     'Pantau estimasi emisi karbon dioksida (CO₂) karhutla per provinsi tahun 2018–2026.',
   ],
+  'peta-tematik': [
+    'Peta tematik',
+    'Peta tematik & mitigasi',
+    'Visualisasi kartografi hasil analisis spasial kerawanan karhutla dan zona prioritas penanganan.',
+  ],
   peraturan: [
     'Peraturan perundangan',
     'Peraturan perundangan',
@@ -339,7 +344,7 @@ function navigate() {
     else link.removeAttribute('aria-current');
   });
   for (const id of ['metrics', 'filters', 'heading-actions'])
-    byId(id).hidden = view === 'panduan' || view === 'emisi' || view === 'peraturan';
+    byId(id).hidden = view === 'panduan' || view === 'emisi' || view === 'peraturan' || view === 'peta-tematik';
   byId('records').hidden = view !== 'dashboard' && view !== 'dataset';
   byId('all-records').hidden = view === 'dataset';
   setNav(false);
@@ -350,6 +355,10 @@ function navigate() {
     byId('foot-note-text').textContent =
       'Nilai emisi merupakan estimasi akumulasi karbon dioksida (CO₂) akibat kebakaran hutan dan lahan.';
     byId('source-foot').textContent = 'Sumber data: SIPONGI KEMENHUT · Emisi CO₂ Karhutla (2018–2026)';
+  } else if (view === 'peta-tematik') {
+    byId('foot-note-text').textContent =
+      'Peta tematik disusun menggunakan QGIS melalui analisis kepadatan titik panas dan buffer radius 16 km titik api ekstrem (>87°C).';
+    byId('source-foot').textContent = 'Sumber data: NASA FIRMS, KLHK, & BIG (2026)';
   } else if (view === 'peraturan') {
     initRegulations();
     byId('foot-note-text').textContent =
@@ -482,6 +491,8 @@ function wireControls() {
     }
   });
   byId('show-hotspots').onchange = (event) => map?.setHotspotsVisible(event.target.checked);
+  byId('show-vulnerability').onchange = (event) => map?.setVulnerabilityVisible(event.target.checked);
+  byId('show-buffer').onchange = (event) => map?.setBufferVisible(event.target.checked);
   for (const input of document.querySelectorAll('input[name=basemap]'))
     input.onchange = () => {
       map?.setBasemap(input.value);

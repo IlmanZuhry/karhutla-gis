@@ -1,4 +1,5 @@
 import { formatDate } from './statistics.js';
+import { createProvinceLookup } from './data.js';
 
 const indonesia = [[-11.1, 94.9], [6.15, 141.1]];
 const atlasCredit = '<a href="https://www.naturalearthdata.com/">Natural Earth</a>';
@@ -71,6 +72,62 @@ function popup(row) {
     fields.append(key, detail);
   }
   container.append(title, fields);
+  return container;
+}
+
+function vulnerabilityCategory(count) {
+  if (count >= 750) return { label: 'Sangat Tinggi', color: '#dc2626', action: 'Operasi modifikasi cuaca, water bombing, sekat kanal gambut, & posko siaga darurat.' };
+  if (count >= 300) return { label: 'Tinggi', color: '#ea580c', action: 'Pembasahan gambut (rewetting), patroli terpadu Manggala Agni, & pemantauan harian.' };
+  if (count >= 100) return { label: 'Sedang', color: '#f59e0b', action: 'Patroli pencegahan rutin, sosialisasi zero burning, & kesiapsiagaan posko desa.' };
+  if (count >= 25) return { label: 'Rendah', color: '#eab308', action: 'Pemantauan deteksi dini satelit dan pelaporan cepat masyarakat.' };
+  return { label: 'Sangat Rendah', color: '#fef08a', action: 'Pemantauan berkala dan edukasi pencegahan kebakaran lahan.' };
+}
+
+function getHotspotCount(props = {}) {
+  const raw = props.NUMPOINTS ?? props.numpoints ?? props.total_hotspot ?? props.COUNT ?? 0;
+  const num = Number(raw);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function vulnerabilityPopup(feature) {
+  const props = feature.properties || {};
+  const name = props.PROVINSI || props.provinsi || props.NAME_1 || 'Provinsi';
+  const count = getHotspotCount(props);
+  const info = vulnerabilityCategory(count);
+  const container = document.createElement('section');
+  container.className = 'hotspot-popup';
+  container.innerHTML = `
+    <h3>${name}</h3>
+    <dl>
+      <dt>Kategori Kerawanan</dt>
+      <dd><strong style="color:${info.color === '#fef08a' ? '#854d0e' : info.color}">${info.label}</strong></dd>
+      <dt>Total Hotspot</dt>
+      <dd>${decimal.format(count)} titik</dd>
+      <dt>Strategi Mitigasi</dt>
+      <dd>${info.action}</dd>
+    </dl>
+  `;
+  return container;
+}
+
+function bufferPopup(feature) {
+  const props = feature.properties || {};
+  const tempK = Number(props.bright_ti4);
+  const tempC = Number.isFinite(tempK) ? decimal.format(tempK - 273.15) + ' °C' : '>87 °C';
+  const prov = props.PROVINSI || props.province || 'Wilayah Terdampak';
+  const container = document.createElement('section');
+  container.className = 'hotspot-popup';
+  container.innerHTML = `
+    <h3>Zona Prioritas Mitigasi (Buffer ~16 km)</h3>
+    <dl>
+      <dt>Lokasi</dt>
+      <dd>${prov}</dd>
+      <dt>Suhu Puncak Titik Api</dt>
+      <dd><strong>${tempC}</strong></dd>
+      <dt>Tindakan Prioritas</dt>
+      <dd>Patroli cepat Manggala Agni, pembuatan sekat bakar darurat, &amp; pembasahan lahan sekitar radius.</dd>
+    </dl>
+  `;
   return container;
 }
 
@@ -202,6 +259,92 @@ export async function createHotspotMap({
   }
   setBasemap(bases.atlas ? 'atlas' : 'osm');
   if (!bases.atlas || provinces.status === 'rejected') onStatus('Sebagian data atlas lokal tidak dapat dimuat.');
+
+  const analysisPane = map.createPane('analysisPane');
+  analysisPane.style.zIndex = '340';
+  const bufferPane = map.createPane('bufferPane');
+  bufferPane.style.zIndex = '360';
+
+  const vulnerabilityLayer = L.layerGroup().addTo(map);
+  const bufferLayer = L.layerGroup().addTo(map);
+
+  const [vulnResult, bufferResult] = await Promise.allSettled([
+    readGeometry('../data/kerawanan_provinsi.geojson'),
+    readGeometry('../data/zona_buffer_prioritas.geojson'),
+  ]);
+
+  if (vulnResult.status === 'fulfilled') {
+    L.geoJSON(vulnResult.value, {
+      pane: 'analysisPane',
+      style: feature => {
+        const count = getHotspotCount(feature.properties);
+        const { color } = vulnerabilityCategory(count);
+        return {
+          color: '#64748b',
+          weight: 0.9,
+          opacity: 0.75,
+          fillColor: color,
+          fillOpacity: count > 0 ? 0.48 : 0.15,
+        };
+      },
+      onEachFeature: (feature, layer) => {
+        layer.bindPopup(() => vulnerabilityPopup(feature), { maxWidth: 300 });
+        layer.on({
+          mouseover: e => e.target.setStyle({ weight: 2, color: '#0f172a', fillOpacity: 0.65 }),
+          mouseout: e => {
+            const count = getHotspotCount(feature.properties);
+            e.target.setStyle({ weight: 0.9, color: '#64748b', fillOpacity: count > 0 ? 0.48 : 0.15 });
+          },
+        });
+      },
+    }).addTo(vulnerabilityLayer);
+  }
+
+ const locateProvince = provinces.status === 'fulfilled' ? createProvinceLookup(provinces.value) : null;
+
+  if (bufferResult.status === 'fulfilled') {
+    L.geoJSON(bufferResult.value, {
+      pane: 'bufferPane',
+      style: {
+        color: '#1d4ed8',
+        weight: 1.4,
+        opacity: 0.9,
+        fillColor: '#3b82f6',
+        fillOpacity: 0.35,
+      },
+      onEachFeature: (feature, layer) => {
+        layer.on('click', (e) => {
+          const prov = locateProvince ? locateProvince(e.latlng.lng, e.latlng.lat) : '';
+          const props = feature.properties || {};
+          const tempK = Number(props.bright_ti4);
+          const tempC = Number.isFinite(tempK) ? decimal.format(tempK - 273.15) + ' °C' : '>87 °C';
+          const box = document.createElement('section');
+          box.className = 'hotspot-popup';
+          box.innerHTML = `
+            <h3>Zona Prioritas Mitigasi (Buffer ~16 km)</h3>
+            <dl>
+              <dt>Lokasi</dt>
+              <dd>${prov || props.PROVINSI || 'Wilayah Terdampak'}</dd>
+              <dt>Suhu Puncak Titik Api</dt>
+              <dd><strong>${tempC}</strong></dd>
+              <dt>Tindakan Prioritas</dt>
+              <dd>Patroli cepat Manggala Agni, pembuatan sekat bakar darurat, &amp; pembasahan lahan sekitar radius.</dd>
+            </dl>
+          `;
+          L.popup({ maxWidth: 300 }).setLatLng(e.latlng).setContent(box).openOn(map);
+        });
+      },
+    }).addTo(bufferLayer);
+  }
+
+  function setVulnerabilityVisible(value) {
+    if (value) vulnerabilityLayer.addTo(map);
+    else map.removeLayer(vulnerabilityLayer);
+  }
+  function setBufferVisible(value) {
+    if (value) bufferLayer.addTo(map);
+    else map.removeLayer(bufferLayer);
+  }
 
   const ClusterIcon = L.DivIcon.extend({
     createIcon(oldIcon) {
@@ -367,7 +510,8 @@ export async function createHotspotMap({
   });
   observer.observe(element);
   return {
-    setRows, setBasemap, setHotspotsVisible, fitIndonesia, fitFiltered, locate, toggleMeasure, clearMeasure,
+    setRows, setBasemap, setHotspotsVisible, setVulnerabilityVisible, setBufferVisible,
+    fitIndonesia, fitFiltered, locate, toggleMeasure, clearMeasure,
     zoomIn: () => map.zoomIn(), zoomOut: () => map.zoomOut(),
     invalidate: () => {
       if (element.clientWidth && element.clientHeight) map.invalidateSize({ pan: false, animate: false });

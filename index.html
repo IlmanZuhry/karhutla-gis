@@ -38,6 +38,7 @@
           >
           <a href="#dataset" data-view="dataset"><i data-icon="database"></i><span>Dataset</span></a>
           <a href="#emisi" data-view="emisi"><i data-icon="flame"></i><span>Data emisi</span></a>
+          <a href="#peta-tematik" data-view="peta-tematik"><i data-icon="map"></i><span>Peta tematik</span></a>
         </nav>
         <div class="nav-caption second-caption">Informasi</div>
         <nav class="nav-list" aria-label="Informasi">
@@ -226,6 +227,8 @@
                     <fieldset>
                       <legend>Layer tematik</legend>
                       <label><input type="checkbox" id="show-hotspots" checked />Titik panas</label>
+                      <label><input type="checkbox" id="show-vulnerability" checked />Zonasi kerawanan provinsi</label>
+                      <label><input type="checkbox" id="show-buffer" checked />Zona prioritas mitigasi (Buffer)</label>
                     </fieldset>
                   </div>
                 </div>
@@ -278,9 +281,13 @@
                 </div>
                 <div class="map-empty" id="map-empty" role="status" hidden></div>
               </div>
-              <div class="map-legend" aria-label="Legenda peta">
-                <strong>Legenda</strong><span><b class="point-key"></b>Titik panas</span
-                ><span><b class="cluster-key"></b>Klaster deteksi</span><span class="crs">WGS 84</span>
+              <div class="map-legend" aria-label="Legenda peta" style="flex-wrap:wrap;gap:0.65rem;">
+                <strong>Legenda</strong>
+                <span><b class="point-key"></b>Titik panas</span>
+                <span><b class="cluster-key"></b>Klaster deteksi</span>
+                <span><b style="display:inline-block;width:11px;height:11px;border-radius:3px;background:rgba(37,99,235,0.35);border:1.5px solid #1d4ed8;vertical-align:middle;margin-right:5px;"></b>Zona prioritas (&gt;87°C)</span>
+                <span><b style="display:inline-block;width:11px;height:11px;border-radius:2px;background:linear-gradient(90deg,#fef08a,#f97316,#dc2626);vertical-align:middle;margin-right:5px;"></b>Kerawanan provinsi</span>
+                <span class="crs">WGS 84</span>
               </div>
             </article>
             <div class="chart-stack">
@@ -519,7 +526,56 @@
 
           <div id="reg-list" style="display:flex;flex-direction:column;gap:0.85rem;margin-top:1rem;"></div>
         </section>
+        <section id="peta-tematik-view" hidden aria-label="Peta tematik dan strategi mitigasi">
+          <article class="panel" style="padding:1.25rem;">
+            <header class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+              <div>
+                <span class="title-icon"><i data-icon="map"></i></span>
+                <h2>Peta Tematik Kerawanan Karhutla &amp; Zona Prioritas Mitigasi</h2>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <a href="./Peta_Karhutla_Indonesia.png" target="_blank" rel="noopener" class="button secondary">
+                  <i data-icon="maximize2"></i>Buka ukuran penuh
+                </a>
+                <a href="./Peta_Karhutla_Indonesia.png" download="Peta_Tematik_Karhutla_Indonesia.png" class="button primary">
+                  <i data-icon="download"></i>Unduh PNG (300 DPI)
+                </a>
+              </div>
+            </header>
 
+            <figure style="margin:0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:0.75rem;text-align:center;">
+              <img
+                src="./Peta_Karhutla_Indonesia.png"
+                alt="Peta Tematik Kerawanan Karhutla dan Zona Prioritas Mitigasi Indonesia"
+                style="width:100%;max-width:1120px;height:auto;border-radius:6px;box-shadow:0 4px 16px rgba(15,23,42,0.08);"
+              />
+              <figcaption style="margin-top:0.65rem;font-size:0.85rem;color:#475569;">
+                Hasil analisis spasial QGIS (Count Points in Polygon &amp; Buffer 16 km pada titik api ekstrem &gt;87°C) dengan sistem koordinat WGS 84.
+              </figcaption>
+            </figure>
+          </article>
+
+          <div class="guide" style="margin-top:1rem;">
+            <article class="panel guide-card">
+              <h2>1. Respon Cepat Zona Prioritas (Buffer 16 km)</h2>
+              <p>
+                Lingkaran zona prioritas dibentuk dari penyaringan titik panas bersuhu ekstrem (<strong>&gt;87°C</strong>). Wilayah ini menjadi fokus utama patroli terpadu Manggala Agni, pembuatan sekat bakar darurat, serta operasi <em>water bombing</em>.
+              </p>
+            </article>
+            <article class="panel guide-card">
+              <h2>2. Pemulihan Ekosistem Gambut (Zonasi Provinsi)</h2>
+              <p>
+                Provinsi dengan kategori kerawanan <strong>Tinggi hingga Sangat Tinggi</strong> (seperti Kalimantan Tengah, Kalimantan Barat, Sumatera Selatan, dan Papua Selatan) diprioritaskan untuk pembasahan lahan gambut (<em>rewetting</em>) dan pembangunan sekat kanal.
+              </p>
+            </article>
+            <article class="panel guide-card">
+              <h2>3. Pencegahan &amp; Penegakan Hukum</h2>
+              <p>
+                Implementasi kebijakan pembukaan lahan tanpa bakar (<em>zero burning policy</em>), pendampingan masyarakat peduli api, serta integrasi deteksi dini satelit VIIRS untuk mencegah meluasnya titik api.
+              </p>
+            </article>
+          </div>
+        </section>
         <section class="guide" id="panduan-view" hidden aria-label="Panduan pengguna">
           <article class="panel guide-card">
             <h2>Membaca peta</h2>
